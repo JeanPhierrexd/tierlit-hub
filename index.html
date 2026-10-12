@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -292,8 +291,9 @@
     let currentUser = null;
     let savedLinks = [];
     let busy = false;
+    let loadVersion = 0;
 
-    // Accesos fijos iguales para todas las cuentas.
+    // Accesos fijos para todas las cuentas.
     const defaults = [
       {
         title: "YouTube",
@@ -336,10 +336,16 @@
       urlText.textContent = item.url;
 
       const link = document.createElement("a");
-      link.href = safeUrl(item.url) || "#";
+      const validUrl = safeUrl(item.url);
+      link.href = validUrl || "#";
       link.target = "_blank";
       link.rel = "noopener noreferrer";
       link.textContent = "Abrir página ↗";
+
+      if (!validUrl) {
+        link.setAttribute("aria-disabled", "true");
+        link.addEventListener("click", event => event.preventDefault());
+      }
 
       card.append(icon, title, urlText, link);
 
@@ -400,45 +406,48 @@
       const grid = $("links-grid");
       grid.replaceChildren();
 
-      // Los tres accesos principales aparecen en todas las cuentas.
+      // Accesos principales visibles en todas las cuentas.
       defaults.forEach(item => grid.append(makeCard(item)));
 
-      // No repetir los servicios principales si ya están guardados.
       const defaultHosts = new Set(
         defaults.map(item =>
           new URL(item.url).hostname.replace(/^www\./, "")
         )
       );
 
-      // Los enlaces adicionales siguen siendo propios de cada usuario.
+      // Solo renderiza los enlaces cargados para el usuario actual.
       savedLinks.forEach(item => {
         try {
           const host = new URL(item.url).hostname.replace(/^www\./, "");
           if (defaultHosts.has(host)) return;
         } catch {
-          // Los enlaces no válidos no se muestran.
           return;
         }
 
         grid.append(makeCard(item, true));
       });
 
-      // El botón de añadir siempre queda al final.
+      // Añadir web siempre queda al final.
       grid.append(makeAddCard());
     }
 
     function showApp(user) {
+      // Invalida cualquier carga pendiente de la cuenta anterior.
+      loadVersion++;
       currentUser = user;
+      savedLinks = [];
+
+      $("links-grid").replaceChildren();
+      $("link-message").textContent = "";
 
       $("auth").classList.toggle("hidden", !!user);
       $("app").classList.toggle("hidden", !user);
       $("logout").classList.toggle("hidden", !user);
 
       if (user) {
+        $("status").textContent = "Cargando...";
         loadLinks();
       } else {
-        savedLinks = [];
-        $("links-grid").replaceChildren();
         $("status").textContent = "Sin iniciar sesión";
       }
     }
@@ -532,14 +541,24 @@
       if (!client || !currentUser) return;
 
       const userId = currentUser.id;
+      const thisLoad = ++loadVersion;
+
       $("status").textContent = "Cargando...";
 
       const { data, error } = await client
         .from("links")
         .select("id,title,url,created_at")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
-      if (!currentUser || currentUser.id !== userId) return;
+      // Ignora respuestas de cargas antiguas o de otra cuenta.
+      if (
+        thisLoad !== loadVersion ||
+        !currentUser ||
+        currentUser.id !== userId
+      ) {
+        return;
+      }
 
       if (error) {
         $("status").textContent = "Error al cargar";
@@ -557,6 +576,7 @@
       event.preventDefault();
       if (!client || !currentUser || busy) return;
 
+      const userId = currentUser.id;
       const title = $("new-title").value.trim();
       const url = safeUrl($("new-url").value.trim());
 
@@ -573,7 +593,7 @@
 
       try {
         const { error } = await client.from("links").insert({
-          user_id: currentUser.id,
+          user_id: userId,
           title,
           url
         });
@@ -582,7 +602,10 @@
 
         $("link-message").textContent =
           "¡Enlace guardado correctamente! ✓";
-        await loadLinks();
+
+        if (currentUser && currentUser.id === userId) {
+          await loadLinks();
+        }
       } catch (error) {
         $("link-message").textContent =
           "No se pudo guardar: " + error.message;
@@ -599,15 +622,19 @@
       if (!client || !currentUser || busy) return;
       if (!confirm("¿Quieres eliminar este enlace?")) return;
 
+      const userId = currentUser.id;
       busy = true;
 
       try {
         const { error } = await client
           .from("links")
           .delete()
-          .eq("id", id);
+          .eq("id", id)
+          .eq("user_id", userId);
 
         if (error) throw error;
+
+        if (!currentUser || currentUser.id !== userId) return;
 
         $("link-message").textContent = "Enlace eliminado.";
         await loadLinks();
@@ -648,4 +675,3 @@
   </script>
 </body>
 </html>
-
