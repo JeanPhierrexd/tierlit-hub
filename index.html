@@ -1,13 +1,11 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0b12">
   <title>Tierlit Hub</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -22,17 +20,17 @@
     }
 
     header {
-      max-width: 1050px;
+      max-width: 1100px;
       margin: auto;
       padding: 24px 20px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
     }
 
     .logo {
-      font-size: 26px;
+      font-size: 27px;
       font-weight: 850;
       letter-spacing: -1px;
     }
@@ -40,7 +38,7 @@
     .logo span, .accent { color: #a78bfa; }
 
     main {
-      max-width: 1050px;
+      max-width: 1100px;
       margin: 25px auto;
       padding: 0 20px;
     }
@@ -48,16 +46,18 @@
     .tag {
       color: #b9a5ff;
       font-size: 12px;
-      letter-spacing: 2px;
       font-weight: 800;
+      letter-spacing: 2px;
     }
 
     h1 {
-      font-size: clamp(34px, 6vw, 56px);
+      margin: 12px 0;
+      font-size: clamp(35px, 6vw, 58px);
       line-height: 1.1;
       letter-spacing: -2px;
-      margin: 12px 0;
     }
+
+    h2 { margin-top: 30px; }
 
     .muted {
       color: #aaa9bd;
@@ -65,24 +65,24 @@
     }
 
     .panel {
-      background: #14141f;
-      border: 1px solid #29283a;
-      border-radius: 20px;
       padding: 22px;
       margin: 20px 0;
+      border: 1px solid #29283a;
+      border-radius: 20px;
+      background: #14141f;
     }
 
     input, button {
-      font: inherit;
+      width: 100%;
+      padding: 12px 14px;
       border-radius: 12px;
-      padding: 13px 14px;
+      font: inherit;
     }
 
     input {
-      width: 100%;
+      color: white;
       background: #0e0e17;
       border: 1px solid #343247;
-      color: white;
       outline: none;
     }
 
@@ -95,118 +95,131 @@
     }
 
     button:disabled {
-      opacity: .5;
+      opacity: .55;
       cursor: wait;
     }
 
     .primary {
-      background: #a78bfa;
       color: #171025;
+      background: #a78bfa;
     }
 
     .secondary {
-      background: #29283a;
       color: white;
+      background: #29283a;
     }
 
     .danger {
-      background: #30202a;
-      color: #ffb5c1;
-      padding: 9px 12px;
       margin-top: 10px;
+      padding: 9px 12px;
+      color: #ffb5c1;
+      background: #30202a;
     }
 
     .row {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .row > * {
-      flex: 1 1 180px;
-      min-width: 0;
-    }
+    .row > * { flex: 1 1 180px; }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 15px;
+      gap: 16px;
     }
 
     .card {
-      background: linear-gradient(145deg, #191927, #11111a);
+      min-width: 0;
+      padding: 20px;
+      overflow-wrap: anywhere;
       border: 1px solid #302e43;
       border-radius: 18px;
-      padding: 20px;
-      min-width: 0;
-      overflow-wrap: anywhere;
+      background: linear-gradient(145deg, #191927, #11111a);
     }
 
     .card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
       display: grid;
       place-items: center;
-      background: #29243d;
-      font-size: 22px;
+      width: 46px;
+      height: 46px;
       margin-bottom: 18px;
+      border-radius: 14px;
+      background: #29243d;
+      font-size: 23px;
     }
 
-    .card h3 { margin: 0 0 7px; }
+    .card h3 { margin: 0 0 8px; }
 
     .card p {
-      font-size: 13px;
       color: #aaa9bd;
+      font-size: 13px;
       overflow-wrap: anywhere;
     }
 
     .card a {
       display: block;
       margin-top: 16px;
-      background: #28243a;
-      color: #e6dcff;
-      text-decoration: none;
-      text-align: center;
       padding: 11px;
       border-radius: 10px;
+      color: #e6dcff;
+      background: #28243a;
+      text-decoration: none;
+      text-align: center;
       font-weight: 750;
     }
 
     .card a:hover { background: #393052; }
 
+    .add-card {
+      border: 1px dashed #75639f;
+      background: linear-gradient(145deg, #191626, #11111a);
+    }
+
+    .add-card .card-icon {
+      color: #c4b5fd;
+      font-size: 28px;
+    }
+
+    .add-card form {
+      display: grid;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
     .hidden { display: none !important; }
 
     .section-title {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
       flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
     .status {
-      font-size: 13px;
       color: #b9a5ff;
+      font-size: 13px;
     }
 
     footer {
-      text-align: center;
-      color: #77768b;
       padding: 30px 15px;
+      color: #77768b;
+      text-align: center;
       font-size: 12px;
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 750px) {
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      main { margin: 15px auto; }
     }
 
-    @media (max-width: 430px) {
+    @media (max-width: 460px) {
       .grid { grid-template-columns: 1fr; }
       .row { flex-direction: column; }
-      .row > * { width: 100%; flex-basis: auto; }
+      .row > * { flex-basis: auto; }
       h1 { letter-spacing: -1px; }
+      main { margin-top: 15px; }
     }
   </style>
 </head>
@@ -214,34 +227,33 @@
 <body>
   <header>
     <div class="logo">Tierlit<span>Hub</span></div>
-    <button id="logout" class="secondary hidden" type="button">
+    <button id="logout" class="secondary hidden"
+            style="width:auto" type="button">
       Cerrar sesión
     </button>
   </header>
 
   <main>
-    <section style="margin-bottom:28px">
+    <section style="margin-bottom:30px">
       <div class="tag">TU ESPACIO DIGITAL</div>
       <h1>Todo lo tuyo.<br><span class="accent">En un solo lugar.</span></h1>
       <p class="muted">Tus páginas favoritas, organizadas a tu manera.</p>
     </section>
 
     <section id="auth" class="panel">
-      <h2>Tu cuenta</h2>
-      <p class="muted">Crea una cuenta o inicia sesión para guardar tus enlaces.</p>
+      <h2 style="margin-top:0">Tu cuenta</h2>
+      <p class="muted">Inicia sesión o crea tu cuenta para guardar tus enlaces.</p>
 
       <form id="auth-form">
         <div style="margin-bottom:12px">
           <input id="email" type="email" placeholder="Correo electrónico"
                  autocomplete="email" required>
         </div>
-
         <div style="margin-bottom:12px">
           <input id="password" type="password"
                  placeholder="Contraseña (mínimo 6 caracteres)"
-                 autocomplete="current-password" minlength="6" required>
+                 minlength="6" autocomplete="current-password" required>
         </div>
-
         <div class="row">
           <button class="primary" id="login-btn" type="submit">
             Iniciar sesión
@@ -251,43 +263,20 @@
           </button>
         </div>
       </form>
-
       <p id="auth-message" class="muted" role="status"></p>
     </section>
 
     <section id="app" class="hidden">
       <div class="section-title">
         <div>
-          <h2>Mis enlaces</h2>
-          <p class="muted">Tus enlaces personales se guardan en tu cuenta.</p>
+          <h2 style="margin-top:0">Mis páginas</h2>
+          <p class="muted">Tus páginas favoritas en un solo lugar.</p>
         </div>
         <span id="status" class="status">Conectando...</span>
       </div>
 
-      <h2>Accesos rápidos</h2>
-      <div class="grid" id="quick-links"></div>
-
-      <section class="panel">
-        <h3>＋ Añadir un enlace</h3>
-
-        <form id="link-form">
-          <div class="row" style="margin-bottom:10px">
-            <input id="link-title" placeholder="Nombre del enlace"
-                   maxlength="60" required>
-            <input id="link-url" type="url"
-                   placeholder="https://..." required>
-          </div>
-
-          <button class="primary" id="add-btn" type="submit">
-            Añadir enlace
-          </button>
-
-          <p id="link-message" class="muted" role="status"></p>
-        </form>
-      </section>
-
-      <h2>Mis enlaces guardados</h2>
-      <div id="links" class="grid"></div>
+      <div id="links-grid" class="grid"></div>
+      <p id="link-message" class="muted" role="status"></p>
     </section>
   </main>
 
@@ -299,17 +288,10 @@
 
     const $ = id => document.getElementById(id);
 
-    const sayAuth = message => {
-      $("auth-message").textContent = message;
-    };
-
-    const sayLink = message => {
-      $("link-message").textContent = message;
-    };
-
     let client = null;
     let currentUser = null;
-    let lastUserId = null;
+    let savedLinks = [];
+    let busy = false;
 
     const defaults = [
       {
@@ -331,10 +313,8 @@
 
     function safeUrl(value) {
       try {
-        const url = new URL(value);
-        return ["https:", "http:"].includes(url.protocol)
-          ? url.href
-          : null;
+        const u = new URL(value);
+        return ["https:", "http:"].includes(u.protocol) ? u.href : null;
       } catch {
         return null;
       }
@@ -363,24 +343,70 @@
       card.append(icon, title, urlText, link);
 
       if (removable) {
-        const button = document.createElement("button");
-        button.className = "danger";
-        button.textContent = "Eliminar";
-        button.type = "button";
-        button.addEventListener("click", () => deleteLink(item.id));
-        card.append(button);
+        const del = document.createElement("button");
+        del.className = "danger";
+        del.type = "button";
+        del.textContent = "Eliminar";
+        del.addEventListener("click", () => deleteLink(item.id));
+        card.append(del);
       }
 
       return card;
     }
 
-    function renderQuickLinks() {
-      const box = $("quick-links");
-      box.replaceChildren();
+    function makeAddCard() {
+      const card = document.createElement("article");
+      card.className = "card add-card";
 
-      defaults.forEach(item => {
-        box.append(makeCard(item));
-      });
+      const icon = document.createElement("div");
+      icon.className = "card-icon";
+      icon.textContent = "+";
+
+      const title = document.createElement("h3");
+      title.textContent = "Añadir web";
+
+      const description = document.createElement("p");
+      description.textContent = "Guarda una nueva página en tu colección.";
+
+      const form = document.createElement("form");
+      form.id = "add-form";
+
+      const name = document.createElement("input");
+      name.id = "new-title";
+      name.placeholder = "Nombre de la página";
+      name.maxLength = 60;
+      name.required = true;
+
+      const url = document.createElement("input");
+      url.id = "new-url";
+      url.type = "url";
+      url.placeholder = "https://...";
+      url.required = true;
+
+      const button = document.createElement("button");
+      button.className = "primary";
+      button.type = "submit";
+      button.textContent = "＋ Añadir enlace";
+
+      form.append(name, url, button);
+      card.append(icon, title, description, form);
+
+      form.addEventListener("submit", addLink);
+      return card;
+    }
+
+    function renderLinks() {
+      const grid = $("links-grid");
+      grid.replaceChildren();
+
+      // 1. Accesos rápidos fijos.
+      defaults.forEach(item => grid.append(makeCard(item)));
+
+      // 2. Enlaces guardados, con los más recientes primero.
+      savedLinks.forEach(item => grid.append(makeCard(item, true)));
+
+      // 3. La tarjeta para añadir webs SIEMPRE queda al final.
+      grid.append(makeAddCard());
     }
 
     function showApp(user) {
@@ -390,28 +416,23 @@
       $("app").classList.toggle("hidden", !user);
       $("logout").classList.toggle("hidden", !user);
 
-      if (user && user.id !== lastUserId) {
-        lastUserId = user.id;
+      if (user) {
         loadLinks();
-      }
-
-      if (!user) {
-        lastUserId = null;
-        $("links").replaceChildren();
+      } else {
+        savedLinks = [];
+        $("links-grid").replaceChildren();
         $("status").textContent = "Sin iniciar sesión";
       }
     }
 
     $("auth-form").addEventListener("submit", async event => {
       event.preventDefault();
+      if (!client || busy) return;
 
-      if (!client) {
-        return sayAuth("No se pudo conectar con Supabase. Recarga la página.");
-      }
-
-      const button = $("login-btn");
-      button.disabled = true;
-      sayAuth("Iniciando sesión...");
+      busy = true;
+      $("login-btn").disabled = true;
+      $("signup-btn").disabled = true;
+      $("auth-message").textContent = "Iniciando sesión...";
 
       try {
         const { data, error } = await client.auth.signInWithPassword({
@@ -421,52 +442,56 @@
 
         if (error) throw error;
 
-        sayAuth("Sesión iniciada correctamente.");
+        $("auth-message").textContent = "Sesión iniciada correctamente.";
         showApp(data.user);
       } catch (error) {
-        sayAuth("Error: " + error.message);
+        $("auth-message").textContent = "Error: " + error.message;
       } finally {
-        button.disabled = false;
+        busy = false;
+        $("login-btn").disabled = false;
+        $("signup-btn").disabled = false;
       }
     });
 
     $("signup-btn").addEventListener("click", async () => {
-      if (!client) {
-        return sayAuth("No se pudo conectar con Supabase. Recarga la página.");
-      }
+      if (!client || busy) return;
 
       const email = $("email").value.trim();
       const password = $("password").value;
 
       if (!email || password.length < 6) {
-        return sayAuth("Escribe tu correo y una contraseña de al menos 6 caracteres.");
+        $("auth-message").textContent =
+          "Escribe tu correo y una contraseña de al menos 6 caracteres.";
+        return;
       }
 
-      const button = $("signup-btn");
-      button.disabled = true;
-      sayAuth("Creando tu cuenta...");
+      busy = true;
+      $("signup-btn").disabled = true;
+      $("login-btn").disabled = true;
+      $("auth-message").textContent = "Creando tu cuenta...";
 
       try {
         const { data, error } = await client.auth.signUp({
           email,
           password,
-          options: {
-            emailRedirectTo: window.location.origin
-          }
+          options: { emailRedirectTo: window.location.origin }
         });
 
         if (error) throw error;
 
         if (data.session) {
-          sayAuth("¡Cuenta creada correctamente!");
+          $("auth-message").textContent = "¡Cuenta creada!";
           showApp(data.user);
         } else {
-          sayAuth("Revisa tu correo para confirmar la cuenta y después inicia sesión.");
+          $("auth-message").textContent =
+            "Revisa tu correo para confirmar tu cuenta y luego inicia sesión.";
         }
       } catch (error) {
-        sayAuth("Error: " + error.message);
+        $("auth-message").textContent = "Error: " + error.message;
       } finally {
-        button.disabled = false;
+        busy = false;
+        $("signup-btn").disabled = false;
+        $("login-btn").disabled = false;
       }
     });
 
@@ -476,12 +501,12 @@
       const { error } = await client.auth.signOut();
 
       if (error) {
-        sayAuth("No se pudo cerrar sesión: " + error.message);
+        $("auth-message").textContent = "Error al cerrar sesión: " + error.message;
         return;
       }
 
       showApp(null);
-      sayAuth("Has cerrado sesión.");
+      $("auth-message").textContent = "Has cerrado sesión.";
     });
 
     async function loadLinks() {
@@ -490,52 +515,40 @@
       const userId = currentUser.id;
       $("status").textContent = "Cargando...";
 
-      try {
-        const { data, error } = await client
-          .from("links")
-          .select("id,title,url,created_at")
-          .order("created_at", { ascending: false });
+      const { data, error } = await client
+        .from("links")
+        .select("id,title,url,created_at")
+        .order("created_at", { ascending: false });
 
-        if (error) throw error;
-        if (!currentUser || currentUser.id !== userId) return;
+      if (!currentUser || currentUser.id !== userId) return;
 
-        $("status").textContent = "Sincronizado ✓";
-
-        const box = $("links");
-        box.replaceChildren();
-
-        if (!data || data.length === 0) {
-          const message = document.createElement("p");
-          message.className = "muted";
-          message.textContent = "Aún no tienes enlaces guardados. Añade el primero.";
-          box.append(message);
-          return;
-        }
-
-        data.forEach(item => box.append(makeCard(item, true)));
-      } catch (error) {
+      if (error) {
         $("status").textContent = "Error al cargar";
-        sayLink("No se pudieron cargar los enlaces: " + error.message);
+        $("link-message").textContent = "No se pudieron cargar los enlaces: " + error.message;
+        return;
       }
+
+      savedLinks = data || [];
+      $("status").textContent = "Sincronizado ✓";
+      renderLinks();
     }
 
-    $("link-form").addEventListener("submit", async event => {
+    async function addLink(event) {
       event.preventDefault();
+      if (!client || !currentUser || busy) return;
 
-      if (!client || !currentUser) {
-        return sayLink("Inicia sesión primero.");
-      }
-
-      const title = $("link-title").value.trim();
-      const url = safeUrl($("link-url").value.trim());
+      const title = $("new-title").value.trim();
+      const url = safeUrl($("new-url").value.trim());
 
       if (!title || !url) {
-        return sayLink("Escribe un nombre y una URL válida.");
+        $("link-message").textContent = "Escribe un nombre y una URL válida.";
+        return;
       }
 
-      const button = $("add-btn");
+      const button = event.currentTarget.querySelector("button");
+      busy = true;
       button.disabled = true;
-      sayLink("Guardando enlace...");
+      button.textContent = "Guardando...";
 
       try {
         const { error } = await client.from("links").insert({
@@ -546,19 +559,24 @@
 
         if (error) throw error;
 
-        $("link-form").reset();
-        sayLink("¡Enlace guardado correctamente! ✓");
+        $("link-message").textContent = "¡Enlace guardado correctamente! ✓";
         await loadLinks();
       } catch (error) {
-        sayLink("No se pudo guardar: " + error.message);
+        $("link-message").textContent = "No se pudo guardar: " + error.message;
       } finally {
-        button.disabled = false;
+        busy = false;
+        if (button.isConnected) {
+          button.disabled = false;
+          button.textContent = "＋ Añadir enlace";
+        }
       }
-    });
+    }
 
     async function deleteLink(id) {
-      if (!client || !currentUser) return;
+      if (!client || !currentUser || busy) return;
       if (!confirm("¿Quieres eliminar este enlace?")) return;
+
+      busy = true;
 
       try {
         const { error } = await client
@@ -568,28 +586,24 @@
 
         if (error) throw error;
 
-        sayLink("Enlace eliminado.");
+        $("link-message").textContent = "Enlace eliminado.";
         await loadLinks();
       } catch (error) {
-        sayLink("No se pudo eliminar: " + error.message);
+        $("link-message").textContent = "No se pudo eliminar: " + error.message;
+      } finally {
+        busy = false;
       }
     }
 
     async function init() {
-      renderQuickLinks();
-
       try {
         if (!window.supabase) {
-          throw new Error("No se pudo cargar la biblioteca de Supabase.");
+          throw new Error("No se pudo cargar Supabase. Recarga la página.");
         }
 
-        client = window.supabase.createClient(
-          SUPABASE_URL,
-          SUPABASE_KEY
-        );
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const { data, error } = await client.auth.getSession();
-
         if (error) throw error;
 
         showApp(data.session ? data.session.user : null);
@@ -598,7 +612,7 @@
           showApp(session ? session.user : null);
         });
       } catch (error) {
-        sayAuth("Error de conexión: " + error.message);
+        $("auth-message").textContent = "Error de conexión: " + error.message;
       }
     }
 
@@ -606,4 +620,5 @@
   </script>
 </body>
           </html>
+
           
