@@ -293,21 +293,22 @@
     let savedLinks = [];
     let busy = false;
 
+    // Accesos fijos iguales para todas las cuentas.
     const defaults = [
       {
-        title: "AULA Hub",
-        url: "https://hub.aulacn.com/home",
-        icon: "⌨️"
+        title: "YouTube",
+        url: "https://www.youtube.com/",
+        icon: "▶️"
       },
       {
-        title: "ATK Hub",
-        url: "https://hub.atk.pro/",
-        icon: "🎮"
+        title: "Instagram",
+        url: "https://www.instagram.com/",
+        icon: "📸"
       },
       {
-        title: "Canva",
-        url: "https://www.canva.com/",
-        icon: "🎨"
+        title: "Spotify",
+        url: "https://open.spotify.com/",
+        icon: "🎵"
       }
     ];
 
@@ -399,13 +400,30 @@
       const grid = $("links-grid");
       grid.replaceChildren();
 
-      // 1. Accesos rápidos fijos.
+      // Los tres accesos principales aparecen en todas las cuentas.
       defaults.forEach(item => grid.append(makeCard(item)));
 
-      // 2. Enlaces guardados, con los más recientes primero.
-      savedLinks.forEach(item => grid.append(makeCard(item, true)));
+      // No repetir los servicios principales si ya están guardados.
+      const defaultHosts = new Set(
+        defaults.map(item =>
+          new URL(item.url).hostname.replace(/^www\./, "")
+        )
+      );
 
-      // 3. La tarjeta para añadir webs SIEMPRE queda al final.
+      // Los enlaces adicionales siguen siendo propios de cada usuario.
+      savedLinks.forEach(item => {
+        try {
+          const host = new URL(item.url).hostname.replace(/^www\./, "");
+          if (defaultHosts.has(host)) return;
+        } catch {
+          // Los enlaces no válidos no se muestran.
+          return;
+        }
+
+        grid.append(makeCard(item, true));
+      });
+
+      // El botón de añadir siempre queda al final.
       grid.append(makeAddCard());
     }
 
@@ -501,7 +519,8 @@
       const { error } = await client.auth.signOut();
 
       if (error) {
-        $("auth-message").textContent = "Error al cerrar sesión: " + error.message;
+        $("auth-message").textContent =
+          "Error al cerrar sesión: " + error.message;
         return;
       }
 
@@ -524,7 +543,8 @@
 
       if (error) {
         $("status").textContent = "Error al cargar";
-        $("link-message").textContent = "No se pudieron cargar los enlaces: " + error.message;
+        $("link-message").textContent =
+          "No se pudieron cargar los enlaces: " + error.message;
         return;
       }
 
@@ -541,7 +561,8 @@
       const url = safeUrl($("new-url").value.trim());
 
       if (!title || !url) {
-        $("link-message").textContent = "Escribe un nombre y una URL válida.";
+        $("link-message").textContent =
+          "Escribe un nombre y una URL válida.";
         return;
       }
 
@@ -559,10 +580,12 @@
 
         if (error) throw error;
 
-        $("link-message").textContent = "¡Enlace guardado correctamente! ✓";
+        $("link-message").textContent =
+          "¡Enlace guardado correctamente! ✓";
         await loadLinks();
       } catch (error) {
-        $("link-message").textContent = "No se pudo guardar: " + error.message;
+        $("link-message").textContent =
+          "No se pudo guardar: " + error.message;
       } finally {
         busy = false;
         if (button.isConnected) {
@@ -589,7 +612,8 @@
         $("link-message").textContent = "Enlace eliminado.";
         await loadLinks();
       } catch (error) {
-        $("link-message").textContent = "No se pudo eliminar: " + error.message;
+        $("link-message").textContent =
+          "No se pudo eliminar: " + error.message;
       } finally {
         busy = false;
       }
@@ -601,7 +625,10 @@
           throw new Error("No se pudo cargar Supabase. Recarga la página.");
         }
 
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        client = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        );
 
         const { data, error } = await client.auth.getSession();
         if (error) throw error;
@@ -612,13 +639,13 @@
           showApp(session ? session.user : null);
         });
       } catch (error) {
-        $("auth-message").textContent = "Error de conexión: " + error.message;
+        $("auth-message").textContent =
+          "Error de conexión: " + error.message;
       }
     }
 
     init();
   </script>
 </body>
-          </html>
+</html>
 
-          
