@@ -1,0 +1,257 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b12">
+  <title>Tierlit Hub</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#0b0b12;color:#f6f5ff;font-family:Inter,system-ui,Arial,sans-serif;min-height:100vh}
+    header{max-width:1050px;margin:auto;padding:26px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .logo{font-size:25px;font-weight:850;letter-spacing:-1px}
+    .logo span{color:#a78bfa}
+    main{max-width:1050px;margin:35px auto;padding:0 20px}
+    .hero{margin-bottom:30px}
+    .tag{color:#b9a5ff;font-size:12px;letter-spacing:2px;font-weight:800}
+    h1{font-size:clamp(32px,6vw,54px);line-height:1.1;letter-spacing:-2px;margin:12px 0}
+    .muted{color:#aaa9bd;line-height:1.6}
+    .panel{background:#14141f;border:1px solid #29283a;border-radius:20px;padding:22px;margin:20px 0}
+    input,button{font:inherit;border-radius:12px;padding:13px 14px}
+    input{width:100%;background:#0e0e17;border:1px solid #343247;color:white;outline:none}
+    input:focus{border-color:#a78bfa}
+    button{border:0;cursor:pointer;font-weight:750}
+    .primary{background:#a78bfa;color:#171025}
+    .secondary{background:#29283a;color:#fff}
+    .danger{background:#30202a;color:#ffb5c1;padding:9px 12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row>*{flex:1;min-width:0}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .card{background:linear-gradient(145deg,#191927,#11111a);border:1px solid #302e43;border-radius:18px;padding:20px;min-width:0}
+    .card-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:#29243d;font-size:22px;margin-bottom:18px}
+    .card h3{margin:0 0 7px;overflow-wrap:anywhere}
+    .card p{font-size:13px;color:#aaa9bd;min-height:20px;overflow-wrap:anywhere}
+    .card a{display:block;margin-top:16px;background:#28243a;color:#e6dcff;text-decoration:none;text-align:center;padding:11px;border-radius:10px;font-weight:750}
+    .hidden{display:none!important}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .status{font-size:13px;color:#b9a5ff}
+    footer{text-align:center;color:#77768b;padding:30px 15px;font-size:12px}
+    @media(max-width:700px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{margin:18px auto}header{padding:20px}}
+    @media(max-width:430px){.grid{grid-template-columns:1fr}.card{padding:18px}.row{flex-direction:column}.row>*{width:100%}h1{letter-spacing:-1px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Tierlit<span>Hub</span></div>
+  <button id="logout" class="secondary hidden">Cerrar sesión</button>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="tag">TU ESPACIO DIGITAL</div>
+    <h1>Todo lo tuyo.<br><span style="color:#a78bfa">En un solo lugar.</span></h1>
+    <p class="muted">Tus páginas favoritas, organizadas a tu manera.</p>
+  </section>
+
+  <section id="auth" class="panel">
+    <h2>Tu cuenta</h2>
+    <p class="muted">Inicia sesión o crea una cuenta para guardar tus propios enlaces.</p>
+    <form id="auth-form">
+      <div style="margin-bottom:12px"><input id="email" type="email" placeholder="Tu correo electrónico" autocomplete="email" required></div>
+      <div style="margin-bottom:12px"><input id="password" type="password" placeholder="Contraseña (mínimo 6 caracteres)" autocomplete="current-password" minlength="6" required></div>
+      <div class="row">
+        <button class="primary" type="submit" id="login-btn">Iniciar sesión</button>
+        <button class="secondary" type="button" id="signup-btn">Crear cuenta</button>
+      </div>
+    </form>
+    <p id="auth-message" class="muted" role="status"></p>
+  </section>
+
+  <section id="app" class="hidden">
+    <div class="section-title">
+      <div><h2>Mis enlaces</h2><p class="muted">Se guardan en tu cuenta al agregarlos.</p></div>
+      <span id="status" class="status">Conectando…</span>
+    </div>
+    <section class="panel">
+      <h3>＋ Añadir un enlace</h3>
+      <form id="link-form">
+        <div class="row" style="margin-bottom:10px">
+          <input id="link-title" placeholder="Nombre (ej. Mi canal)" maxlength="60" required>
+          <input id="link-url" type="url" placeholder="https://..." required>
+        </div>
+        <button class="primary" type="submit">Añadir enlace</button>
+        <p id="link-message" class="muted" role="status"></p>
+      </form>
+    </section>
+    <div id="links" class="grid"></div>
+  </section>
+</main>
+<footer>Tierlit Hub · Tu mundo, tus enlaces.</footer>
+
+<script>
+  // Después sustituiremos estos valores por los de tu proyecto Supabase.
+  const SUPABASE_URL = "PEGA_AQUI_TU_URL";
+  const SUPABASE_KEY = "PEGA_AQUI_TU_CLAVE_PUBLICA";
+  let client = null;
+  let currentUser = null;
+
+  const $ = id => document.getElementById(id);
+  const authBox = $("auth"), appBox = $("app");
+  const sayAuth = msg => $("auth-message").textContent = msg;
+  const sayLink = msg => $("link-message").textContent = msg;
+
+  function ready() {
+    return SUPABASE_URL.startsWith("https://") &&
+      !SUPABASE_KEY.includes("PEGA_AQUI");
+  }
+
+  function showApp(user) {
+    currentUser = user;
+    authBox.classList.toggle("hidden", !!user);
+    appBox.classList.toggle("hidden", !user);
+    $("logout").classList.toggle("hidden", !user);
+    if (user) loadLinks();
+  }
+
+  $("auth-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!ready()) {
+      sayAuth("Falta conectar Supabase. Guarda primero el archivo; configuraremos la conexión después.");
+      return;
+    }
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    $("login-btn").disabled = true;
+    const {data, error} = await client.auth.signInWithPassword({email, password});
+    $("login-btn").disabled = false;
+    if (error) return sayAuth(error.message);
+    sayAuth("Sesión iniciada.");
+    showApp(data.user);
+  });
+
+  $("signup-btn").addEventListener("click", async () => {
+    if (!ready()) {
+      sayAuth("Falta conectar Supabase. Guarda primero el archivo; configuraremos la conexión después.");
+      return;
+    }
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    if (!email || password.length < 6) {
+      return sayAuth("Escribe tu correo y una contraseña de al menos 6 caracteres.");
+    }
+    const {data, error} = await client.auth.signUp({
+      email, password,
+      options: { emailRedirectTo: window.location.origin }
+    });
+    if (error) return sayAuth(error.message);
+    if (data.session) {
+      sayAuth("¡Cuenta creada!");
+      showApp(data.user);
+    } else {
+      sayAuth("Cuenta creada. Revisa tu correo para confirmar el registro y luego inicia sesión.");
+    }
+  });
+
+  $("logout").addEventListener("click", async () => {
+    if (client) await client.auth.signOut();
+    showApp(null);
+  });
+
+  function safeUrl(value) {
+    try {
+      const u = new URL(value);
+      return ["https:", "http:"].includes(u.protocol) ? u.href : null;
+    } catch { return null; }
+  }
+
+  async function loadLinks() {
+    if (!client || !currentUser) return;
+    $("status").textContent = "Cargando…";
+    const {data, error} = await client.from("links")
+      .select("id,title,url,created_at")
+      .order("created_at", {ascending:false});
+    if (error) {
+      $("status").textContent = "No se pudo cargar";
+      sayLink(error.message);
+      return;
+    }
+    $("status").textContent = "Guardado en la nube ✓";
+    renderLinks(data || []);
+  }
+
+  function renderLinks(items) {
+    const container = $("links");
+    container.replaceChildren();
+    if (!items.length) {
+      const p = document.createElement("p");
+      p.className = "muted";
+      p.textContent = "Aún no tienes enlaces. ¡Añade el primero!";
+      container.append(p);
+      return;
+    }
+    items.forEach(item => {
+      const card = document.createElement("article");
+      card.className = "card";
+      const icon = document.createElement("div");
+      icon.className = "card-icon";
+      icon.textContent = "↗";
+      const title = document.createElement("h3");
+      title.textContent = item.title;
+      const urlText = document.createElement("p");
+      urlText.textContent = item.url;
+      const link = document.createElement("a");
+      link.href = safeUrl(item.url) || "#";
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Abrir página ↗";
+      const remove = document.createElement("button");
+      remove.className = "danger";
+      remove.style.marginTop = "10px";
+      remove.textContent = "Eliminar";
+      remove.addEventListener("click", () => deleteLink(item.id));
+      card.append(icon, title, urlText, link, remove);
+      container.append(card);
+    });
+  }
+
+  $("link-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!client || !currentUser) return sayLink("Inicia sesión primero.");
+    const title = $("link-title").value.trim();
+    const url = safeUrl($("link-url").value.trim());
+    if (!title || !url) return sayLink("Escribe un nombre y una URL válida que empiece por https://");
+    const btn = e.submitter;
+    if (btn) btn.disabled = true;
+    const {error} = await client.from("links").insert({
+      user_id: currentUser.id, title, url
+    });
+    if (btn) btn.disabled = false;
+    if (error) return sayLink(error.message);
+    $("link-form").reset();
+    sayLink("¡Enlace guardado automáticamente! ✓");
+    await loadLinks();
+  });
+
+  async function deleteLink(id) {
+    if (!client || !currentUser || !confirm("¿Eliminar este enlace?")) return;
+    const {error} = await client.from("links").delete().eq("id", id);
+    if (error) return sayLink(error.message);
+    sayLink("Enlace eliminado.");
+    await loadLinks();
+  }
+
+  if (ready() && window.supabase) {
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    client.auth.getSession().then(({data}) => showApp(data.session?.user || null));
+    client.auth.onAuthStateChange((_event, session) => {
+      showApp(session?.user || null);
+    });
+  } else {
+    $("status").textContent = "Pendiente de conexión";
+  }
+</script>
+</body>
+  </html>
+  
